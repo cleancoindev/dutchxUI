@@ -100,10 +100,10 @@ function TokenInputNoAmount(props) {
 		} else {
 			return (
 					<span className={classes.coins}>
-					{"KNC"}
+					{"GNO"}
 					<img
 					src={
-						"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdd974d5c2e2928dea5f71b9825b8b646686bd200/logo.png"
+						"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6810e776880c02933d47db1b9fc05908e5386b96/logo.png"
 					}
 					alt="coin logo"
 					className={classes.img}

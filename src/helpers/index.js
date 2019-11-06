@@ -6,6 +6,7 @@ const web3 = new Web3(Web3.givenProvider);
 
 
 
+
 // get the token balance of an address
 export async function getTokenBalance(tokenAddress, signer, signerAddress) {
   const erc20Contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
@@ -41,10 +42,10 @@ export async function approveToken(signer, beneficiary, tokenAddress) {
 
 
 
-export function getCorrectImageLink() {
+export function getCorrectImageLink(networkId = 4) {
   const table1 = {};
   const table2 = {};
-  coins[3].forEach(coin => {
+  coins[networkId].forEach(coin => {
     table1[coin["symbol"]] = coin;
   });
   coins[1].forEach(coin => {

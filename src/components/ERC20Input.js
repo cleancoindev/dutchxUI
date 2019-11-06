@@ -69,7 +69,7 @@ function ERC20Input(props) {
     open: false,
     coin: "",
     amount: 0,
-    availableCoins: Object.values(getCorrectImageLink())
+    availableCoins: Object.values(getCorrectImageLink(context.networkId))
   });
 
   const handleChange = coin => {
@@ -118,15 +118,16 @@ function ERC20Input(props) {
       );
     } else {
       return  (<span className={classes.coins}>
-        {"DAI"}
+        {"WETH"}
         <img
-          src={"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359/logo.png"}
+          src={"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2/logo.png"}
           alt="coin logo"
           className={classes.img}
         />
       </span>)
     }
   };
+
 
   const handleAmount = name => event => {
     const decimals = coinContext.actionFrom.decimals

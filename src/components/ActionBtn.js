@@ -16,6 +16,8 @@ import proxyRegistryABI from "../constants/ABIs/proxy-registry.json";
 import dsProxyABI from "../constants/ABIs/ds-proxy.json";
 import gelatoCoreABI from "../constants/ABIs/gelatoCore.json";
 import ERC20_ABI from "../constants/ABIs/erc20.json";
+import DUMMY_ABI from "../constants/ABIs/dummyContract.json";
+
 
 // import helpers
 import { encodeWithFunctionSelector } from "../helpers";
@@ -24,12 +26,13 @@ import { encodeWithFunctionSelector } from "../helpers";
 import {
 	DS_PROXY_REGISTRY,
 	GELATO_CORE,
-	EXECUTOR
+	EXECUTOR,
+	DUMMY
 } from "../constants/contractAddresses";
 
 import { triggerTimestampPassed } from "../constants/triggers";
-import { kyberTrade } from "../constants/actions";
-import { multiMintKyberTrade } from "../constants/scripts";
+import { DUTCHX_SELL } from "../constants/actions";
+import { multiMintTrade } from "../constants/scripts";
 
 // Import Components
 import CircularDeterminate from "./CircularDeterminate";
@@ -77,42 +80,19 @@ function ActionBtn(props) {
 	});
 
 	function CreateTransactButton() {
+		console.log(`Proxy Status: ${proxyStatus}`)
 		switch (proxyStatus) {
 			case 1:
 				return (
 					<Button
 						variant="contained"
 						color="primary"
-						onClick={devirginize}
+						onClick={modalDevirginize}
 					>
 						Create Account
 					</Button>
 				);
-
 			case 2:
-				// return (<Button color='primary' onClick={test}>Test</Button>);
-				return (
-					<Button
-						variant="contained"
-						color="primary"
-						onClick={deployAndSetGuard}
-					>
-						Deploy Proxy Guard
-					</Button>
-				);
-
-			case 3:
-				return (
-					<Button
-						variant="contained"
-						color="primary"
-						onClick={setAuthority}
-					>
-						Authorize Well Timed
-					</Button>
-				);
-
-			case 4:
 				let executableFunc;
                 let buttonText;
                 let color;
@@ -154,9 +134,53 @@ function ActionBtn(props) {
 		}
     }
 
+	function modalDevirginize() {
+		const copyModalState = { ...modalState };
+        copyModalState.open = true;
+        copyModalState.title = `Create a gelato wallet`;
+        copyModalState.body = `Your gelato wallet will enable you to automate future transactions with the gelato protocol. All funds will remain in your regular wallet.`;
+        copyModalState.btn1 = "Cancel";
+        copyModalState.btn2 = "Create wallet";
+        copyModalState.func = example;
+        setModalState(devirginize);
+	}
+
+	async function example() {
+		const copyModalState = { ...modalState };
+		copyModalState.open = false;
+		setModalState(copyModalState);
+		setWaitingForTX(true);
+		// const signer = context.library.getSigner();
+		const dummyAddress = DUMMY[context.networkId]
+
+		const { ethereum, web3 } = window
+
+		const provider = new ethers.providers.Web3Provider(web3.currentProvider);
+
+		// There is only ever up to one account in MetaMask exposed
+		const signer = provider.getSigner();
+
+		const dummyContract = new ethers.Contract(
+			dummyAddress,
+			DUMMY_ABI,
+			provider
+		);
+
+		let contractWithSigner = dummyContract.connect(signer)
+
+		let tx = await contractWithSigner.increment()
+		console.log(tx)
+
+		setWaitingForTX(false);
+	}
+
+
 
 	async function devirginize() {
 		setWaitingForTX(true);
+		const copyModalState = { ...modalState };
+		copyModalState.open = false;
+		setModalState(copyModalState);
 
 		const signer = context.library.getSigner();
 		const proxyRegistryAddress = DS_PROXY_REGISTRY[context.networkId];
@@ -172,122 +196,97 @@ function ActionBtn(props) {
 			signer
 		);
 
-		let guardAddress;
-		gelatoCoreContract.on("LogDevirginize", (oldValue, newValue, event) => {
-
-			guardAddress = newValue;
-			setGuardAddress(guardAddress);
-			localStorage.setItem("guardAddress", guardAddress);
-		});
-
-		// Devirginize user
-		// 1st Tx
-		gelatoCoreContract.devirginize(standardOverrides).then(
-			function(txReceipt) {
-				signer.provider
-					.waitForTransaction(txReceipt["hash"])
-					.then(async function(tx) {
-						setWaitingForTX(false);
-						updateProxyStatus(3);
-						// Fetch guard contract
-
-						const proxyAddress = await proxyRegistryContract.proxies(
-							context.account
-						);
-
-						console.log(tx);
-						if (proxyAddress !== ethers.constants.AddressZero) {
-							// 2nd Tx
-							// const proxyContract = new ethers.Contract(
-							// 	proxyAddress,
-							// 	dsProxyABI,
-							// 	signer
-							// );
-						} else {
-							console.log("Proxy not found");
-						}
-					});
-			},
-			error => {
-				console.log(error);
-				setWaitingForTX(false);
-			}
-		);
-	}
-
-	async function deployAndSetGuard() {
-		setWaitingForTX(true);
-		const signer = context.library.getSigner();
-
-		const gelatoCoreAddress = GELATO_CORE[context.networkId];
-		const gelatoCoreContract = new ethers.Contract(
-			gelatoCoreAddress,
-			gelatoCoreABI,
-			signer
-		);
-
-		let guardAddress;
-		gelatoCoreContract.on("LogGuard", _guardAddress => {
-			setGuardAddress(_guardAddress);
-			localStorage.setItem("guardAddress", guardAddress);
-		});
-		// Devirginize user
-		gelatoCoreContract.guard(standardOverrides).then(
-			function(txReceipt) {
-				signer.provider
-					.waitForTransaction(txReceipt["hash"])
-					.then(async function(tx) {
-						setWaitingForTX(false);
-						updateProxyStatus(3);
-					});
-			},
-			error => {
-				console.log("Sorry");
-				setWaitingForTX(false);
-			}
-		);
-	}
-
-	async function setAuthority() {
-		setWaitingForTX(true);
-		const signer = context.library.getSigner();
-		const proxyRegistryAddress = DS_PROXY_REGISTRY[context.networkId];
-		const proxyRegistryContract = new ethers.Contract(
-			proxyRegistryAddress,
-			proxyRegistryABI,
-			signer
-		);
-
-		const proxyAddress = await proxyRegistryContract.proxies(
-			context.account
-		);
-		const proxyContract = new ethers.Contract(
-			proxyAddress,
-			dsProxyABI,
-			signer
-		);
-		let guardAddressCopy = guardAddress;
-		if (guardAddressCopy === undefined) {
-			guardAddressCopy = localStorage.getItem("guardAddress");
+		let prefix;
+		switch(context.networkId) {
+			case(1):
+				prefix = '';
+				break;
+			case(3):
+				prefix = 'ropsten.'
+				break;
+			case(4):
+				prefix = 'rinkeby.'
+				break;
 		}
 
-		setWaitingForTX(true);
 
-		proxyContract.setAuthority(guardAddressCopy, standardOverrides).then(
-			function(txReceipt) {
-				signer.provider
-					.waitForTransaction(txReceipt["hash"])
-					.then(async function(tx) {
-						setWaitingForTX(false);
-						updateProxyStatus(4);
-					});
-			},
-			error => {
-				console.log("Sorry");
+		// Devirginize user
+		// Onboarding Tx
+		gelatoCoreContract.devirginize(standardOverrides)
+		.then( txReceipt => {
+			// console.log("modal should open")
+			// // Open new Modal
+			// const copyModalState2 = { ...modalState };
+			// copyModalState2.open = true;
+			// copyModalState2.title = `Waiting for tx to get mined`;
+			// copyModalState2.body = `Etherscan Link: https://${prefix}etherscan.io/tx/${txReceipt['hash']}`;
+			// copyModalState2.btn1 = "";
+			// copyModalState2.btn2 = "";
+			// copyModalState2.func = undefined;
+			// setModalState(copyModalState2);
+			// console.log("now we are waiting")
+
+			signer.provider.waitForTransaction(txReceipt["hash"])
+			.then(minedTx => {
 				setWaitingForTX(false);
-			}
-		);
+				copyModalState.open = false;
+				setModalState(copyModalState);
+				updateProxyStatus(3);
+				// Fetch guard contract
+				copyModalState.open = true;
+				copyModalState.title = `Your gelato wallet was successfully created`;
+				copyModalState.body = `You can now start scheduling your DutchX Sell Orders. Tx on Etherscan: https://${prefix}etherscan.io/tx/${txReceipt['hash']}`;
+				copyModalState.btn1 = "Close";
+				copyModalState.btn2 = "";
+				copyModalState.func = undefined;
+				setModalState(copyModalState);
+			})
+
+		})
+		.catch(error => {console.log(error)})
+
+
+
+
+		// gelatoCoreContract.devirginize(standardOverrides).then(
+		// 	function(txReceipt) {
+		// 		signer.provider
+		// 			.waitForTransaction(txReceipt["hash"])
+		// 			.then(async function(tx) {
+		// 				setWaitingForTX(false);
+		// 				copyModalState.open = false;
+		// 				setModalState(copyModalState);
+		// 				updateProxyStatus(3);
+		// 				// Fetch guard contract
+
+		// 				const proxyAddress = await proxyRegistryContract.proxies(
+		// 					context.account
+		// 				);
+
+		// 				console.log(tx);
+		// 				if (proxyAddress !== ethers.constants.AddressZero) {
+		// 					// 2nd Tx
+		// 					// const proxyContract = new ethers.Contract(
+		// 					// 	proxyAddress,
+		// 					// 	dsProxyABI,
+		// 					// 	signer
+		// 					// );
+		// 				} else {
+		// 					console.log("Proxy not found");
+		// 				}
+		// 			});
+		// 	},
+		// 	error => {
+		// 		console.log(error);
+		// 		setWaitingForTX(false);
+		// 	}
+		// );
+
+
+
 	}
+
+
 
 	function displayInsufficientBalance() {
 		const actionSellTokenSymbol = coins["actionFrom"]["symbol"];
@@ -433,7 +432,7 @@ function ActionBtn(props) {
         copyModalState.open = true;
         copyModalState.open = true;
         copyModalState.title = `Schedule Orders ${actionSellTokenSymbol}`;
-        copyModalState.body = `Confirm swapping ${userfriendlyAmount / time.numOrders} ${actionSellTokenSymbol} for ${actionBuyTokenSymbol} every ${time.intervalTime} ${time.intervalType} using ${time.numOrders} trades starting now`;
+        copyModalState.body = `Confirm swapping ${userfriendlyAmount / time.numOrders} ${actionSellTokenSymbol} for ${actionBuyTokenSymbol} every ${time.intervalTime} ${time.intervalType} using ${time.numOrders} trades starting from now`;
         copyModalState.btn1 = "Cancel";
         copyModalState.btn2 = "Schedule";
         copyModalState.func = mintSplitSell;
@@ -441,29 +440,30 @@ function ActionBtn(props) {
     }
 
 	async function mintSplitSell() {
+		console.log(time)
+		console.log(coins)
 		setWaitingForTX(true);
 		let copyModalState = { ...modalState };
-		copyModalState.open = false;
-		setModalState(copyModalState);
 
-        // copyModalState.open = false;
-        // copyModalState.func = undefined;
-        // setModalState(copyModalState);
-        // console.log("CLOSE MODAL in ACTION COMPONENT")
 
-        // copyModalState.open = true;
-        // copyModalState.title = `Confirm Tx in Metamask`;
-        // copyModalState.body = "";
-        // copyModalState.btn1 = "";
-        // copyModalState.btn2 = "";
-        // copyModalState.func = undefined;
-        // setModalState(copyModalState);
-        // console.log("OPEN MODAL in ACTION COMPONENT")
+        copyModalState.open = false;
+        copyModalState.func = undefined;
+        setModalState(copyModalState);
+        console.log("CLOSE MODAL in ACTION COMPONENT")
+
+        copyModalState.open = true;
+        copyModalState.title = `Confirm Tx in Metamask`;
+        copyModalState.body = "";
+        copyModalState.btn1 = "";
+        copyModalState.btn2 = "";
+        copyModalState.func = undefined;
+        setModalState(copyModalState);
+        console.log("OPEN MODAL in ACTION COMPONENT")
 
 		// Function to call
 		// splitSellMint(address _timeTrigger, address _kyberSwapAction, bytes calldata _actionPayload, address _excecutor, uint256 _startingTime, uint256 _intervalTime, uint256 _noOfOrders, uint256 _prepayment) d
 
-		let timestamp = Math.floor(Date.now() / 1000);
+		let timestamp = Math.ceil(Date.now() / 1000);
 		let multiplier;
 		switch (time.intervalType) {
 			case "minutes":
@@ -493,16 +493,6 @@ function ActionBtn(props) {
 		const actionBuyToken = coins["actionTo"]["address"];
 		const actionBuyTokenSymbol = coins["actionTo"]["symbol"];
 
-		// actionData
-		const actionData = [
-			actionSellToken,
-			sellAmountPerSubOrder.toString(),
-			actionBuyToken,
-			context.account,
-			0
-		];
-
-
 		// Fetch prepayment
 		const signer = context.library.getSigner();
 		const gelatoCoreAddress = GELATO_CORE[context.networkId];
@@ -512,23 +502,42 @@ function ActionBtn(props) {
 			signer
 		);
 
-		const timeTriggerAddress = triggerTimestampPassed.address;
-		const kyberTradeAddress = kyberTrade.address;
-		const actionPayload = encodeWithFunctionSelector(kyberTrade.method, kyberTrade.dataTypesWthNames, actionData);
+		const timeTriggerAddress = triggerTimestampPassed.address[context.networkId];
+		const actionAddress = DUTCHX_SELL.address[context.networkId];
 		// method, funcDataTypes, funcParameters
 		const executorAddress = EXECUTOR[context.networkId];
 		const startingTime = timestamp;
 		// const triggerPayload = encodeWithFunctionSelector(triggerTimestampPassed.method, triggerTimestampPassed.dataTypesWthNames, startingTime);
 		const intervalTime = interval;
 		const noOfOrders = time.numOrders;
-		const kyberSwapPrepayment = await gelatoCoreContract.getMintingDepositPayable(
-			kyberTradeAddress,
+		const actionPrepayment = await gelatoCoreContract.getMintingDepositPayable(
+			actionAddress,
 			executorAddress
 		);
 
+		/*
+		address _user,
+		address _sellToken,
+		address _buyToken,
+		uint256 _sellAmount
+		*/
 
-		const prepayment =
-			parseInt(kyberSwapPrepayment.toString()) * noOfOrders;
+		const actionData = [
+			context.account,
+			actionSellToken,
+			actionBuyToken,
+			sellAmountPerSubOrder.toString()
+		];
+
+		const actionPayload = encodeWithFunctionSelector(DUTCHX_SELL.method, DUTCHX_SELL.dataTypesWthNames, actionData);
+
+		const prepayment = parseInt(actionPrepayment.toString()) * noOfOrders;
+		// actionData
+
+
+
+
+
 
 		// Override tx values
 		let overrides = {
@@ -549,12 +558,12 @@ function ActionBtn(props) {
 		};
 
 		const multiMintPayload = encodeWithFunctionSelector(
-			multiMintKyberTrade.funcSelector,
-			multiMintKyberTrade.dataTypesWithName,
+			multiMintTrade.funcSelector,
+			multiMintTrade.dataTypesWithName,
 			[
 				timeTriggerAddress,
 				startingTime,
-				kyberTradeAddress,
+				actionAddress,
 				actionPayload,
 				executorAddress,
 				intervalTime,
@@ -564,19 +573,17 @@ function ActionBtn(props) {
 
 		// decoder(multiMintPayload, multiMintKyberTrade.dataTypesWithName)
 
-		// console.log(`About to mint:
-		//     kyber Action address: ${kyberTradeAddress},
-		//     timeTriggerAddress: ${timeTriggerAddress},
-		//     executorAddress: ${executorAddress}
-		//     StartingTime: ${startingTime},
-		//     intervalTime: ${intervalTime},
-		//     noOfOrders: ${noOfOrders},
-		//     kyberSwapPrepayment: ${kyberSwapPrepayment.toString()},
-		//     FuncSelector: ${multiMintKyberTrade.funcSelector},
-		//     DataTypes: ${multiMintKyberTrade.dataTypesWithName},
-		//     Action Payload: ${actionPayload}
-		//     Payload: ${multiMintPayload},
-		// `);
+		console.log(`About to mint:
+		    timeTriggerAddress: ${timeTriggerAddress},
+		    executorAddress: ${executorAddress}
+		    StartingTime: ${startingTime},
+		    intervalTime: ${intervalTime},
+		    noOfOrders: ${noOfOrders},
+		    FuncSelector: ${multiMintTrade.funcSelector},
+		    DataTypes: ${multiMintTrade.dataTypesWithName},
+		    Action Payload: ${actionPayload}
+		    Payload: ${multiMintPayload},
+		`);
 
 		// Fetch user proxy address
 		const proxyRegistryAddress = DS_PROXY_REGISTRY[context.networkId];
@@ -589,14 +596,21 @@ function ActionBtn(props) {
 		const proxyAddress = await proxyRegistryContract.proxies(
 			context.account
 		);
+
+		console.log(proxyAddress)
+
 		const proxyContract = await new ethers.Contract(
 			proxyAddress,
 			dsProxyABI,
 			signer
 		);
 
+		let isRegistredProxy = await proxyRegistryContract.registeredProxy(proxyAddress)
+		console.log(`Proxy is registered? ${isRegistredProxy}`)
+
+
 		proxyContract
-			.execute(multiMintKyberTrade.address, multiMintPayload, overrides)
+			.execute(multiMintTrade.address[context.networkId], multiMintPayload, overrides)
 			.then(
 				function(txReceipt) {
 
@@ -641,6 +655,8 @@ function ActionBtn(props) {
 					setWaitingForTX(false);
 				}
 			);
+
+
 	}
 
 	return (

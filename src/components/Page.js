@@ -8,7 +8,8 @@ import TimeOrderWrapper from './TimeOrderWrapper'
 import { CoinProvider } from "../contexts/CoinContext";
 import { coins } from '../constants/coins'
 
-
+// Actions
+import {DUTCHX_SELL} from '../constants/actions'
 
 import {TimeProvider} from "../contexts/TimeContext"
 
@@ -71,66 +72,29 @@ function Page() {
   // Used to display orders Table in orders
   const [orders, setOrders] = React.useState([{swap: "", when: "", status: ""}])
 
-
   const [activeCoins, setActivCoins] = React.useState({
-    triggerFrom: {
-      symbol: "KNC",
-      name: "KyberNetwork",
-      address: "0x4e470dc7321e84ca96fcaedd0c8abcebbaeb68c6",
-      decimals: 18,
-      id: "0x4e470dc7321e84ca96fcaedd0c8abcebbaeb68c6",
-      mainnet: "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
-      logo: function(address) {
-        return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
-      },
-      reserves_src: [
-        "0x63825c174ab367968EC60f061753D3bbD36A0D8F",
-        "0x21433Dec9Cb634A23c6A4BbcCe08c83f5aC2EC18",
-        "0xD6000fda0b38f4Bff4CfAb188E0bd18e8725a5e7",
-        "0xA467b88BBF9706622be2784aF724C4B44a9d26F4"
-      ],
-      reserves_dest: [
-        "0x63825c174ab367968EC60f061753D3bbD36A0D8F",
-        "0x21433Dec9Cb634A23c6A4BbcCe08c83f5aC2EC18",
-        "0xD6000fda0b38f4Bff4CfAb188E0bd18e8725a5e7",
-        "0xA467b88BBF9706622be2784aF724C4B44a9d26F4"
-      ]
-    },
+    triggerFrom: "",
     triggerTo: "",
     actionFrom: {
-      symbol: "DAI",
-      name: "DAI",
-      address: "0xad6d458402f60fd3bd25163575031acdce07538d",
+      symbol: "WETH",
+      name: "Wrapped Ether",
+      address: "0xc778417e063141139fce010982780140aa0cd5ab",
       decimals: 18,
-      id: "0xad6d458402f60fd3bd25163575031acdce07538d",
-      mainnet: "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
-      reserves_dest: ["0xEB52Ce516a8d054A574905BDc3D4a176D3a2d51a"],
-      reserves_src: ["0xEB52Ce516a8d054A574905BDc3D4a176D3a2d51a"],
+      id: "0xc778417e063141139fce010982780140aa0cd5ab",
+      mainnet: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       logo: function(address) {
         return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
       }},
     actionTo: {
-      symbol: "KNC",
-      name: "KyberNetwork",
-      address: "0x4e470dc7321e84ca96fcaedd0c8abcebbaeb68c6",
+      symbol: "GNO",
+      name: "Gnosis",
+      address: "0xd0dab4e640d95e9e8a47545598c33e31bdb53c7c",
       decimals: 18,
-      id: "0x4e470dc7321e84ca96fcaedd0c8abcebbaeb68c6",
+      id: "0xd0dab4e640d95e9e8a47545598c33e31bdb53c7c",
+      mainnet: "0x6810e776880c02933d47db1b9fc05908e5386b96",
       logo: function(address) {
         return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
-      },
-      reserves_src: [
-        "0x63825c174ab367968EC60f061753D3bbD36A0D8F",
-        "0x21433Dec9Cb634A23c6A4BbcCe08c83f5aC2EC18",
-        "0xD6000fda0b38f4Bff4CfAb188E0bd18e8725a5e7",
-        "0xA467b88BBF9706622be2784aF724C4B44a9d26F4"
-      ],
-      reserves_dest: [
-        "0x63825c174ab367968EC60f061753D3bbD36A0D8F",
-        "0x21433Dec9Cb634A23c6A4BbcCe08c83f5aC2EC18",
-        "0xD6000fda0b38f4Bff4CfAb188E0bd18e8725a5e7",
-        "0xA467b88BBF9706622be2784aF724C4B44a9d26F4"
-      ]
-    }
+      }}
   });
   const [selectedTokenDetails, setSelectedTokenDetails] = React.useState({needAllowance: false, sufficientBalance: false})
 
@@ -140,7 +104,7 @@ function Page() {
   const [time, setTime] = React.useState({
     numOrders: 2,
     intervalTime: 10,
-    intervalType: 'minutes'
+    intervalType: 'seconds'
   });
 
   const timePackage = {time, setTime}
@@ -179,7 +143,7 @@ function Page() {
     actionSellToken = ethers.utils.getAddress(actionSellToken)
     actionBuyToken = ethers.utils.getAddress(actionBuyToken)
     // console.log(coins[3])
-    coins[3].forEach(coin => {
+    coins[context.networkId].forEach(coin => {
       let coinAddress = ethers.utils.getAddress(coin.address)
       if (coinAddress === actionSellToken) {
         actionSellTokenSymbol = coin.symbol
@@ -246,19 +210,19 @@ function Page() {
 
       const filter1 = {
         address: gelatoCoreAddress,
-        fromBlock: 6660070,
+        fromBlock: 5394268,
         topics: [topic1]
       };
 
       const filter2 = {
         address: gelatoCoreAddress,
-        fromBlock: 6660070,
+        fromBlock: 5394268,
         topics: [topic2]
       };
 
       const filter3 = {
         address: gelatoCoreAddress,
-        fromBlock: 6660070,
+        fromBlock: 5394268,
         topics: [topic3]
       };
 
@@ -354,8 +318,14 @@ function Page() {
 
         // SWAP:
         let actionPayload = userLogs2[execId][1][3].toString()
-        let dataTypes = ['address', 'uint256', 'address', 'address', 'uint256']
-        // let decodedAction = simpleMultipleDecoder(actionPayload, dataTypes)
+
+        let dataTypes = DUTCHX_SELL.dataTypes
+        /*
+          address _user,
+          address _sellToken,
+          address _buyToken,
+          uint256 _sellAmount
+        */
         try {
 
           let decodedAction = decoder(actionPayload, dataTypes)
@@ -371,7 +341,18 @@ function Page() {
       let orderCopy = [];
 
       userOrders.forEach(order => {
-        let newOrder = createRows(order.swap[0], order.swap[2], order.swap[1], order.when, order.status)
+        console.log(order)
+
+       /*
+       function createRows(
+        actionSellToken,
+        actionBuyToken,
+        actionSellAmount,
+        timestamp,
+        status
+        )
+       */
+        let newOrder = createRows(order.swap[1], order.swap[2], order.swap[3], order.when, order.status)
         orderCopy.push(newOrder)
       })
 

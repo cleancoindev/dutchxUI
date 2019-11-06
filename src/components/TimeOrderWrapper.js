@@ -162,22 +162,23 @@ function TimeOrderWrapper(props) {
     return (
         <React.Fragment>
             <ConnectBtn proxyStatus={proxyStatus} networkId={context.networkId} updateProxyStatus={updateProxyStatus} />
-              <h1>Well Timed <span role="image">🐎</span></h1>
-              <h3>Time-based order splitting on Kyber</h3>
+              <h1>GelatoDX</h1>
+              <h3>Time-based order splitting on the DutchX</h3>
 
               <Card className={classes.card} raised>
                 <CardContent className={classes.cardContent}>
                   {/* <h4 className={classes.title}>Title</h4> */}
-                    <p className={classes.inputs}>Split my</p>
+                    <p className={classes.inputs}>Sell</p>
                     <ERC20Input selectedTokenDetails={selectedTokenDetails} updateSelectedTokenDetails={updateSelectedTokenDetails} updateActiveCoins={updateActiveCoins}></ERC20Input>
                     <p className={classes.inputs}>to</p>
                     <TokenInputNoAmount inputData={actionTo}></TokenInputNoAmount>
-                    <p className={classes.inputs}>order over</p>
+                    <p className={classes.inputs}>over</p>
                     <TimeBetween ></TimeBetween>
-                    <Interval></Interval>
-                    <p className={classes.inputs}>using</p>
-                    <NoOfSwaps></NoOfSwaps>
-                    <p className={classes.inputs}>trades</p>
+                    <p className={classes.inputs}>days</p>
+                    {/* <Interval></Interval> */}
+                    <p className={classes.inputs}>every</p>
+                    {/* <NoOfSwaps></NoOfSwaps> */}
+                    <p className={classes.inputs}>24 hours</p>
                 </CardContent>
               </Card>
 

@@ -1,0 +1,47 @@
+[
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_timeTrigger",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_startTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_action",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_actionPayload",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address payable",
+          "name": "_selectedExecutor",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_intervalSpan",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_numberOfMints",
+          "type": "uint256"
+        }
+      ],
+      "name": "multiMint",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    }
+]

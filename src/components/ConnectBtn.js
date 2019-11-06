@@ -6,11 +6,12 @@ import ProxyContext from '../contexts/ProxyContext'
 
 import { Button, makeStyles } from "@material-ui/core";
 import { ethers } from "ethers";
-import { DS_PROXY_REGISTRY } from "../constants/contractAddresses";
+import { DS_PROXY_REGISTRY, GELATO_CORE } from "../constants/contractAddresses";
 
 // ABIs
 import proxyRegistryABI from "../constants/ABIs/proxy-registry.json";
 import dsProxyABI from "../constants/ABIs/ds-proxy.json";
+import DS_GUARD_ABI from "../constants/ABIs/ds-guard.json";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -51,7 +52,7 @@ function ConnectBtn(props) {
   function LogOut() {
     switch(context.networkId)
     {
-      case 3:
+      case 4:
         checkIfUserHasProxy()
 
         // const fetchedRows = fetchOrderFromLocalStorage();
@@ -82,7 +83,7 @@ function ConnectBtn(props) {
               context.unsetConnector();
             }}
           >
-            Ropsten Network only
+            Rinkeby Network only
           </Button>
         );
     }
@@ -97,52 +98,16 @@ function ConnectBtn(props) {
       signer
     );
     let proxyAddress = await proxyRegistryContract.proxies(context.account);
+    // IF user has no proxy, set proxyStatus to 1)
     if (proxyAddress === ethers.constants.AddressZero && proxyStatus !== 3) {
       // console.log(
       //   "No proxy found, please deploy proxy through registry + deploy associated guard through guard registry"
       // );
       updateProxyStatus(1)
-      // Deploy Proxy
-      // Deploy Guard
+
+    // IF user has a proxy, set proxyStatus to 3
     } else {
-      // console.log(`Proxy exists - Address: ${proxyAddress}`);
-      // fetch proxy
-      const proxyContract = new ethers.Contract(
-        proxyAddress,
-        dsProxyABI,
-        signer
-      );
-
-      // Check if proxy has guard / authority
-      let guardAddress = await proxyContract.authority();
-      // Also check past events if user deployed guard at some point
-      const localStorageGuard = localStorage.getItem('guardAddress')
-      // console.log(`Local Storage: ${localStorageGuard}`)
-
-      if (guardAddress === ethers.constants.AddressZero  && proxyStatus !== 3 && localStorageGuard === null) {
-        // console.log(
-        //   "No guard contract found as proxy authority, please 1) deploy guard and 2) set as authority"
-        // );
-        updateProxyStatus(2)
-      }
-      else if (guardAddress === ethers.constants.AddressZero  && proxyStatus !== 3 && localStorageGuard !== null)
-      {
-        // console.log(`Guard already deployed, set Authority`)
-        updateProxyStatus(3)
-
-      }
-      else if (guardAddress === ethers.constants.AddressZero  && proxyStatus === 3)
-      {
-        // console.log(`Guard already deployed, set Authority`)
-        updateProxyStatus(3)
-      }
-      else
-      {
-        // console.log(`Guard contract found - address: ${guardAddress}`);
-        // console.log("Purchase!");
-        updateProxyStatus(4)
-
-      }
+      updateProxyStatus(2)
     }
   }
 

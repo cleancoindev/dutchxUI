@@ -869,6 +869,29 @@ export const coins = {
       }
     }
   ],
+  4: [
+    {
+      symbol: "WETH",
+      name: "Wrapped Ether",
+      address: "0xc778417e063141139fce010982780140aa0cd5ab",
+      decimals: 18,
+      id: "0xc778417e063141139fce010982780140aa0cd5ab",
+      logo: function(address) {
+        return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
+      }
+    },
+    {
+      symbol: "GNO",
+      name: "Gnosis",
+      address: "0xd0dab4e640d95e9e8a47545598c33e31bdb53c7c",
+      decimals: 18,
+      id: "0xd0dab4e640d95e9e8a47545598c33e31bdb53c7c",
+      logo: function(address) {
+        return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
+      }
+    }
+
+  ],
   3: [
     {
       symbol: "KNC",
