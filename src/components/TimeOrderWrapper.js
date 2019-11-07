@@ -168,17 +168,18 @@ function TimeOrderWrapper(props) {
               <Card className={classes.card} raised>
                 <CardContent className={classes.cardContent}>
                   {/* <h4 className={classes.title}>Title</h4> */}
-                    <p className={classes.inputs}>Sell</p>
+                  <p className={classes.inputs}>Starting now</p>
+                    <p className={classes.inputs}>sell</p>
                     <ERC20Input selectedTokenDetails={selectedTokenDetails} updateSelectedTokenDetails={updateSelectedTokenDetails} updateActiveCoins={updateActiveCoins}></ERC20Input>
                     <p className={classes.inputs}>to</p>
                     <TokenInputNoAmount inputData={actionTo}></TokenInputNoAmount>
-                    <p className={classes.inputs}>over</p>
-                    <TimeBetween ></TimeBetween>
-                    <p className={classes.inputs}>days</p>
-                    {/* <Interval></Interval> */}
                     <p className={classes.inputs}>every</p>
                     {/* <NoOfSwaps></NoOfSwaps> */}
-                    <p className={classes.inputs}>24 hours</p>
+                    <p className={classes.inputs}>day</p>
+                    <p className={classes.inputs}>for</p>
+                    <TimeBetween ></TimeBetween>
+                    <p className={classes.inputs}>day(s)</p>
+                    {/* <Interval></Interval> */}
                 </CardContent>
               </Card>
 

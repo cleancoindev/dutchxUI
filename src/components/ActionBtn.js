@@ -417,7 +417,9 @@ function ActionBtn(props) {
 
 
 		setOrders(orderCopy);
-    }
+	}
+
+
 
     function modalMintSplitSell() {
 
@@ -451,13 +453,14 @@ function ActionBtn(props) {
         setModalState(copyModalState);
         console.log("CLOSE MODAL in ACTION COMPONENT")
 
-        copyModalState.open = true;
-        copyModalState.title = `Confirm Tx in Metamask`;
-        copyModalState.body = "";
-        copyModalState.btn1 = "";
-        copyModalState.btn2 = "";
-        copyModalState.func = undefined;
-        setModalState(copyModalState);
+        // Open new Modal
+		copyModalState.open = true;
+		copyModalState.title = `Waiting for tx to get mined`;
+		copyModalState.body = ``;
+		copyModalState.btn1 = "";
+		copyModalState.btn2 = "";
+		copyModalState.func = undefined;
+		setModalState(copyModalState);
         console.log("OPEN MODAL in ACTION COMPONENT")
 
 		// Function to call
@@ -613,15 +616,6 @@ function ActionBtn(props) {
 			.execute(multiMintTrade.address[context.networkId], multiMintPayload, overrides)
 			.then(
 				function(txReceipt) {
-
-                    // Open new Modal
-					copyModalState.open = true;
-					copyModalState.title = `Waiting for tx to get mined`;
-					copyModalState.body = `Tx hash: ${txReceipt['hash']}`;
-					copyModalState.btn1 = "";
-					copyModalState.btn2 = "";
-					copyModalState.func = undefined;
-                    setModalState(copyModalState);
 					signer.provider
 						.waitForTransaction(txReceipt["hash"])
 						.then(async function(tx) {
