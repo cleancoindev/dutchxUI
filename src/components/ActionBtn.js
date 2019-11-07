@@ -80,7 +80,6 @@ function ActionBtn(props) {
 	});
 
 	function CreateTransactButton() {
-		console.log(`Proxy Status: ${proxyStatus}`)
 		switch (proxyStatus) {
 			case 1:
 				return (

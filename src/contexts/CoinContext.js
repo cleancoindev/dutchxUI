@@ -9,7 +9,7 @@ const CoinContext = React.createContext({
     amountTriggerFrom: 100,
     amountTriggerTo: 0,
     amountActionTo: 0,
-    amountActionFrom: 0
+    amountActionFrom: 1
 })
 
 export const CoinProvider = CoinContext.Provider
