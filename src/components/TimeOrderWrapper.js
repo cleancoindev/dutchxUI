@@ -138,7 +138,7 @@ function TimeOrderWrapper(props) {
               <p className={classes.inputs}>Interval between each order</p>
               <CardContent className={classes.cardContent}>
 
-                <TimeBetween ></TimeBetween>
+                <TimeBetween updateActiveCoins={updateActiveCoins}></TimeBetween>
                 <p className={classes.inputs}>day(s)</p>
 
               </CardContent>

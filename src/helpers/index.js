@@ -49,7 +49,7 @@ export function getCorrectImageLink(networkId = 4) {
     table1[coin["symbol"]] = coin;
   });
   coins[1].forEach(coin => {
-    table2[coin["symbol"]] = coin["address"];
+    table2[coin["symbol"]] = ethers.utils.getAddress(coin["address"]);
   });
 
   const table3 = {};
@@ -76,6 +76,8 @@ export function getCorrectImageLink(networkId = 4) {
   }
 
   table4.sort(compare)
+  console.log(table4)
+  console.log(ethers.utils.getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"))
   return table4
 }
 

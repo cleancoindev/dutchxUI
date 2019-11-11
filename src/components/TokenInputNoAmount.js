@@ -78,6 +78,7 @@ function TokenInputNoAmount(props) {
 
 	function changeOrderDetails(coinContextCopy) {
 		// Change coinContext Orders
+		let newIntervalTime = time.intervalTime * 86400000
 		const actionSellToken = coinContext["actionFrom"]
 		const actionSellTokenSymbol = coinContext["actionFrom"]["symbol"];
 		const actionBuyTokenSymbol = coinContextCopy["actionTo"]["symbol"]
@@ -92,7 +93,7 @@ function TokenInputNoAmount(props) {
 		  let timestamp = coinContext['timestamp'] + (i * 86400000)
 		  let date1 = new Date(timestamp);
 		  let timestampString1 = `${date1.toLocaleDateString()} - ${date1.toLocaleTimeString()}`;
-		  let order = {swap: `${userfriendlyAmountPerSubOrder} ${actionSellTokenSymbol} => ${actionBuyTokenSymbol}`, when: `${timestampString1}`}
+		  let order = {swap: `${parseFloat(userfriendlyAmountPerSubOrder).toFixed(4)} ${actionSellTokenSymbol} => ${actionBuyTokenSymbol}`, when: `${timestampString1}`}
 		  newOrders.push(order)
 		}
 
@@ -137,7 +138,7 @@ function TokenInputNoAmount(props) {
 					{"GNO"}
 					<img
 					src={
-						"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6810e776880c02933d47db1b9fc05908e5386b96/logo.png"
+						"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6810e776880C02933D47DB1b9fc05908e5386b96/logo.png"
 					}
 					alt="coin logo"
 					className={classes.img}
