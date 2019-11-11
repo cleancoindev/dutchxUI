@@ -36,45 +36,28 @@ import { ProxyProvider } from "../contexts/ProxyContext";
 // Context so we access the users account & provider
 import { useWeb3Context } from "web3-react";
 
-
-// const style = makeStyles({
-//   card: {
-//     margin: "25px"
-//   },
-//   arrow: {
-//     marginTop: "20px"
-//   },
-//   title: {
-//     textAlign: "left"
-//   }
-// });
-
 function Page() {
+  console.log("Rerender Page")
   const context = useWeb3Context();
-
-
-  // let ordersFromLocalStorage
-  // if (context.active) {
-  //   console.log("isActive")
-  //   let fetchedLocalStorage = JSON.parse(localStorage.getItem(`triggered-${context.account}`))
-  //   if (fetchedLocalStorage !== null)
-  //   {
-  //     ordersFromLocalStorage = fetchedLocalStorage
-  //   }
-  //   else {
-  //     ordersFromLocalStorage = []
-  //   }
-  //   console.log(ordersFromLocalStorage)
-  // } else {
-  //   ordersFromLocalStorage = []
-  // }
 
   // Used to display orders Table in orders
   const [orders, setOrders] = React.useState([{swap: "", when: "", status: ""}])
 
-  const [activeCoins, setActivCoins] = React.useState({
+  let timestamp1 = Date.now();
+  let date1 = new Date(timestamp1);
+  const timestampString1 = `${date1.toLocaleDateString()} - ${date1.toLocaleTimeString()}`;
+  let timestamp2 = timestamp1 + 86400000
+  let date2 = new Date(timestamp2)
+  const timestampString2 = `${date2.toLocaleDateString()} - ${date2.toLocaleTimeString()}`;
+  const  dummy = [{swap: '0.5 WETH => GNO', when: `${timestampString1}`}, {swap: '0.5 WETH => GNO', when: `${timestampString2}`}]
+  // const [orders2, setOrders2] = React.useState(dummy)
+
+  const [activeCoins, setActiveCoins] = React.useState({
     triggerFrom: "",
     triggerTo: "",
+    orders: dummy,
+    timestamp: timestamp1,
+    amountActionFrom: ethers.utils.parseUnits("1.0", "ether"),
     actionFrom: {
       symbol: "WETH",
       name: "Wrapped Ether",
@@ -84,7 +67,8 @@ function Page() {
       mainnet: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       logo: function(address) {
         return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
-      }},
+      }
+    },
     actionTo: {
       symbol: "GNO",
       name: "Gnosis",
@@ -95,6 +79,7 @@ function Page() {
       logo: function(address) {
         return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
       }}
+
   });
   const [selectedTokenDetails, setSelectedTokenDetails] = React.useState({needAllowance: false, sufficientBalance: false})
 
@@ -103,7 +88,7 @@ function Page() {
 
   const [time, setTime] = React.useState({
     numOrders: 2,
-    intervalTime: 10,
+    intervalTime: 1,
     intervalType: 'seconds'
   });
 
@@ -116,13 +101,14 @@ function Page() {
   }
 
   function updateActiveCoins(coins) {
-    // console.log(`Setting coins in Page.js`);
+    console.log(`Setting coins in Page.js`);
     // console.log(`${coins}`);
-    setActivCoins(coins);
+    setActiveCoins(coins);
+
   }
 
   function updateSelectedTokenDetails(newSelectedTokenDetails) {
-    // console.log(`Updating Selected Token Details`);
+    console.log(`Updating Selected Token Details`);
     // console.log(`${newSelectedTokenDetails}`);
     setSelectedTokenDetails(newSelectedTokenDetails)
   }
@@ -386,7 +372,7 @@ function Page() {
         <CoinProvider value={activeCoins}>
           <OrderProvider value={ordersContext}>
             <TimeProvider value={timePackage}>
-              <TimeOrderWrapper proxyStatus={proxyStatus} networkId={context.networkId} updateProxyStatus={updateProxyStatus} updateSelectedTokenDetails={updateSelectedTokenDetails} selectedTokenDetails={selectedTokenDetails} updateActiveCoins={updateActiveCoins} fetchExecutionClaims={fetchExecutionClaims} >
+              <TimeOrderWrapper proxyStatus={proxyStatus} networkId={context.networkId} updateProxyStatus={updateProxyStatus} updateSelectedTokenDetails={updateSelectedTokenDetails} selectedTokenDetails={selectedTokenDetails} updateActiveCoins={updateActiveCoins} fetchExecutionClaims={fetchExecutionClaims} orders2={activeCoins.orders} >
               </TimeOrderWrapper>
             </TimeProvider>
           </OrderProvider>

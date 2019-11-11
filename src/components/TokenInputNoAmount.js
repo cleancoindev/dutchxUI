@@ -7,7 +7,9 @@ import {
 	MenuItem
 } from "@material-ui/core";
 
+import { ethers } from "ethers";
 import CoinContext from "../contexts/CoinContext";
+import TimeContext from "../contexts/TimeContext";
 import { getCorrectImageLink } from "../helpers";
 
 const useStyles = makeStyles(theme => ({
@@ -38,9 +40,13 @@ const useStyles = makeStyles(theme => ({
 function TokenInputNoAmount(props) {
 
 	// fetch params
-	const inputData = props.inputData
-    const tokenType = inputData.tokenType
 
+	const updateActiveCoins = props.updateActiveCoins
+
+
+
+	const updateSelectedTokenDetails = props.updateSelectedTokenDetails
+  	const selectedTokenDetails = props.selectedTokenDetails
 
 
     // defaultToken => none if 'Select a Token'
@@ -49,7 +55,8 @@ function TokenInputNoAmount(props) {
 
 	const classes = useStyles();
 	const coinContext = useContext(CoinContext);
-
+	const timeContext = useContext(TimeContext)
+	const time = timeContext.time
 	// State
 
 	const [state, setState] = React.useState({
@@ -69,13 +76,41 @@ function TokenInputNoAmount(props) {
 	//   // handleClose()
 	// };
 
+	function changeOrderDetails(coinContextCopy) {
+		// Change coinContext Orders
+		let newIntervalTime = time.intervalTime * 86400000
+		const actionSellToken = coinContext["actionFrom"]
+		const actionSellTokenSymbol = coinContext["actionFrom"]["symbol"];
+		const actionBuyTokenSymbol = coinContextCopy["actionTo"]["symbol"]
+		const actionSellAmount = coinContext["amountActionFrom"];
+		let sellAmountPerSubOrder =  ethers.utils.bigNumberify(actionSellAmount).div(ethers.utils.bigNumberify(time.numOrders))
+		let newOrders = []
+		const decimals = coinContext.actionFrom.decimals
+		let userfriendlyAmountPerSubOrder = ethers.utils.formatUnits(sellAmountPerSubOrder, decimals)
+
+		for (let i = 0; i < time.numOrders; i++)
+		{
+		  let timestamp = coinContext['timestamp'] + (i * 86400000)
+		  let date1 = new Date(timestamp);
+		  let timestampString1 = `${date1.toLocaleDateString()} - ${date1.toLocaleTimeString()}`;
+		  let order = {swap: `${parseFloat(userfriendlyAmountPerSubOrder).toFixed(4)} ${actionSellTokenSymbol} => ${actionBuyTokenSymbol}`, when: `${timestampString1}`}
+		  newOrders.push(order)
+		}
+
+		coinContextCopy.orders = newOrders;
+		updateActiveCoins(coinContextCopy)
+	}
+
 	const handleChange = coin => {
 		const newState = { ...state };
 		newState["coin"] = coin;
 		setState({ ...state, "coin": coin, open: false });
-		coinContext[tokenType] = coin;
+		const coinContextCopy = {...coinContext}
+		coinContextCopy['actionTo'] = coin;
+		changeOrderDetails(coinContextCopy)
 		// handleClose()
 	};
+
 
 	const handleClickOpen = async () => {
 		setState({ ...state, open: true });
@@ -103,7 +138,7 @@ function TokenInputNoAmount(props) {
 					{"GNO"}
 					<img
 					src={
-						"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6810e776880c02933d47db1b9fc05908e5386b96/logo.png"
+						"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6810e776880C02933D47DB1b9fc05908e5386b96/logo.png"
 					}
 					alt="coin logo"
 					className={classes.img}
