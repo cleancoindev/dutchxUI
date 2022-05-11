@@ -5,8 +5,8 @@
   "dependencies": {
     "@material-ui/core": "^4.5.1",
     "ethers": "^4.0.39",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
     "react-scripts": "3.2.0",
     "scrypt-js": "^2.0.4",
     "web3": "^1.2.1",
